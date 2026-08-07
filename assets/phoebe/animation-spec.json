@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "renderFps": 60,
+  "frameIndexBase": 1,
+  "grid": {
+    "columns": 5,
+    "rows": 3,
+    "frameCount": 15,
+    "order": "row-major"
+  },
+  "pools": {
+    "entry": [
+      { "id": "entry-run", "sheet": "spritesheets_v2/entry-run.png", "durationMs": 1200, "weight": 55, "loopDuringTravel": true },
+      { "id": "entry-summon", "sheet": "spritesheets_v2/entry-summon.png", "durationMs": 1200, "weight": 25, "loopDuringTravel": false },
+      { "id": "entry-drop", "sheet": "spritesheets_v2/entry-drop.png", "durationMs": 1200, "weight": 20, "loopDuringTravel": false }
+    ],
+    "eat": [
+      { "id": "eat-bite", "sheet": "spritesheets_v2/eat-bite.png", "durationMs": 1400, "weight": 55, "deleteTriggerFrame": 11 },
+      { "id": "eat-slurp", "sheet": "spritesheets_v2/eat-slurp.png", "durationMs": 1400, "weight": 30, "deleteTriggerFrame": 11 },
+      { "id": "eat-toss", "sheet": "spritesheets_v2/eat-toss.png", "durationMs": 1400, "weight": 15, "deleteTriggerFrame": 11 }
+    ],
+    "satisfied": [
+      { "id": "satisfied-bellypat", "sheet": "spritesheets_v2/satisfied-bellypat.png", "durationMs": 1100, "weight": 60 },
+      { "id": "satisfied-hop", "sheet": "spritesheets_v2/satisfied-hop.png", "durationMs": 1100, "weight": 40 }
+    ],
+    "exit": [
+      { "id": "exit-run", "sheet": "spritesheets_v2/exit-run.png", "durationMs": 1300, "weight": 45, "loopDuringTravel": true },
+      { "id": "exit-sparkle", "sheet": "spritesheets_v2/exit-sparkle.png", "durationMs": 1300, "weight": 35, "loopDuringTravel": false },
+      { "id": "exit-teleport", "sheet": "spritesheets_v2/exit-teleport.png", "durationMs": 1300, "weight": 20, "loopDuringTravel": false }
+    ],
+    "failure": [
+      { "id": "failure-bite", "sheet": "spritesheets_v2/failure-bite.png", "durationMs": 1500, "weight": 100 }
+    ]
+  },
+  "selectionRules": {
+    "avoidImmediateRepeat": true,
+    "successFlow": ["entry", "eat", "satisfied", "exit"],
+    "failureFlow": ["entry", "eat", "failure", "exit"]
+  }
+}
