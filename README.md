@@ -4,6 +4,22 @@ Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资�
 
 当前动画版本：**V6**。
 
+## 动画预览
+
+下面的 GIF 直接使用程序实际加载的 V6 图集，并按照运行状态机的动作顺序生成，不是概念效果图。
+
+### 完整正面流程
+
+<p align="center">
+  <img src="docs/screenshots/phoebe-front-flow.gif" width="520" alt="菲比从天而降、取文件、吃文件、满足并退场的完整动画" />
+</p>
+
+### 彩蛋动作
+
+<p align="center">
+  <img src="docs/screenshots/phoebe-easter-eggs.gif" width="640" alt="空文件夹、多文件饼干、大文件蓄力和连续召唤彩蛋动画" />
+</p>
+
 ## 当前功能
 
 - 原生 Windows 资源管理器右键菜单，支持文件、文件夹和多选。
