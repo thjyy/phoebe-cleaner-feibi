@@ -8,6 +8,10 @@ Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资�
 
 下面的 GIF 直接使用程序实际加载的正式图集生成，不是概念效果图。
 
+### 实际运行演示
+
+[▶ 点击观看 2026-08-08 实际运行演示（MP4，5.9 MiB）](docs/demos/phoebe-cleaner-demo-2026-08-08.mp4)
+
 ### V8 固定正面流程：法阵点心
 
 <p align="center">
