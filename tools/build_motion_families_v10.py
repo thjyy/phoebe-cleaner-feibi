@@ -2,7 +2,7 @@
 
 Each story owns its entry, deletion and exit artwork.  The generated 15-pose
 atlases are normalized once per clip, boundary poses are reused verbatim, and
-optical-flow midpoint frames turn every stage into a 29-frame runtime atlas.
+motion-aware inbetweens turn every stage into a 57-frame runtime atlas.
 """
 
 from __future__ import annotations
@@ -18,7 +18,6 @@ from build_full_sequence_v8 import (
     alpha_midpoint,
     median_metrics,
     pack,
-    split_generated,
     split_runtime,
 )
 
@@ -46,6 +45,25 @@ STABLE_INDICES = {
     "core": (0, 1, 2),
     "exit": (0, 1),
 }
+
+
+def split_generated_v10(path: Path) -> list[Image.Image]:
+    """Split a 5x3 ImageGen sheet and discard its thicker white separators."""
+
+    atlas = Image.open(path).convert("RGBA")
+    width, height = atlas.size
+    frames: list[Image.Image] = []
+    for index in range(15):
+        column = index % 5
+        row = index // 5
+        left = round(column * width / 5)
+        top = round(row * height / 3)
+        right = round((column + 1) * width / 5)
+        bottom = round((row + 1) * height / 3)
+        inset = 8
+        cell = atlas.crop((left + inset, top + inset, right - inset, bottom - inset))
+        frames.append(cell.resize((320, 320), Image.Resampling.LANCZOS))
+    return frames
 
 
 def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -111,6 +129,49 @@ def add_v10_interframes(frames: list[Image.Image]) -> list[Image.Image]:
         three_quarters = alpha_midpoint(middle, right)
         result.extend((left, quarter, middle, three_quarters))
     result.append(frames[-1])
+    assert len(result) == V10_FRAME_COUNT
+    return result
+
+
+def translate_frame(frame: Image.Image, x_offset: int) -> Image.Image:
+    canvas = Image.new("RGBA", CELL_SIZE, (0, 0, 0, 0))
+    canvas.alpha_composite(frame, (x_offset, 0))
+    return canvas
+
+
+def add_file_juice_exit_frames(frames: list[Image.Image]) -> list[Image.Image]:
+    """Keep one Phoebe/cart instance while the whole rig travels off-screen.
+
+    Optical flow cannot reliably infer a rigid cart translation across a large
+    gap and creates a second ghost Phoebe.  The cup-to-standing poses still use
+    motion-aware inbetweens; the travel section switches poses discretely while
+    moving one complete sprite every rendered frame.
+    """
+
+    result: list[Image.Image] = []
+    for index in range(4):
+        left = frames[index]
+        right = frames[index + 1]
+        middle = alpha_midpoint(left, right)
+        result.extend(
+            (
+                left,
+                alpha_midpoint(left, middle),
+                middle,
+                alpha_midpoint(middle, right),
+            )
+        )
+    result.append(frames[4])
+
+    travel_frames = 36
+    for index in range(1, travel_frames + 1):
+        progress = index / travel_frames
+        eased = progress * progress * (3.0 - 2.0 * progress)
+        pose = min(10, 4 + int(index * 7 / (travel_frames + 1)))
+        x_offset = -round(eased * (CELL_SIZE[0] + 36))
+        result.append(translate_frame(frames[pose], x_offset))
+
+    result.extend(Image.new("RGBA", CELL_SIZE, (0, 0, 0, 0)) for _ in range(4))
     assert len(result) == V10_FRAME_COUNT
     return result
 
@@ -202,7 +263,7 @@ def main() -> None:
         stage_target = target
         for stage in ("entry", "core", "exit"):
             name = f"front-{slug}-{stage}"
-            frames = split_generated(SOURCE_DIR / f"{name}.png")
+            frames = split_generated_v10(SOURCE_DIR / f"{name}.png")
             transformed, transform = transform_clip_contained(
                 frames, STABLE_INDICES[stage], stage_target
             )
@@ -218,7 +279,16 @@ def main() -> None:
         # Exact pose reuse prevents a one-frame scale/anchor reset at stage cuts.
         base_clips[1][0] = base_clips[0][-1].copy()
         base_clips[2][0] = base_clips[1][-1].copy()
-        runtime_clips = [add_v10_interframes(clip) for clip in base_clips]
+        runtime_clips = [
+            (
+                add_file_juice_exit_frames(clip)
+                if slug == "file-juice" and stage == "exit"
+                else add_v10_interframes(clip)
+            )
+            for stage, clip in zip(("entry", "core", "exit"), base_clips)
+        ]
+        if slug == "file-juice":
+            details["exit_interpolation"] = "rigid-single-instance-travel"
 
         for stage, frames in zip(("entry", "core", "exit"), runtime_clips):
             pack(frames, RUNTIME_COLUMNS).save(

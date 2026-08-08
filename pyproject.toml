@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phoebe-cleaner"
-version = "0.4.0"
+version = "0.4.1"
 description = "An animated Windows recycle-bin companion"
 requires-python = ">=3.11"
 dependencies = [

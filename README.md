@@ -224,7 +224,7 @@ V10 六套合计占普通单文件的 50%，V8/V9 合计占 10%，其余 40% 使
 
 ## 构建与安装
 
-普通用户可直接从 [GitHub Releases](https://github.com/thjyy/phoebe-cleaner-feibi/releases/latest) 下载 `PhoebeCleaner-Setup-v0.4.0.exe`。安装器按当前用户安装，不要求管理员权限，并自动配置右键菜单、设置快捷方式和标准卸载入口。
+普通用户可直接从 [GitHub Releases](https://github.com/thjyy/phoebe-cleaner-feibi/releases/latest) 下载 `PhoebeCleaner-Setup-v0.4.1.exe`。安装器按当前用户安装，不要求管理员权限，并自动配置右键菜单、设置快捷方式和标准卸载入口。
 
 以下步骤用于从源码构建：
 
