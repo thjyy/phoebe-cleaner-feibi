@@ -1,7 +1,11 @@
 /build/
 /.vs/
 /out/
+/.venv/
+/dist-qt/
+/dist-qt-builds/
+**/__pycache__/
+*.egg-info/
 *.user
 *.suo
 *.log
-

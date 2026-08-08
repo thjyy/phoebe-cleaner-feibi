@@ -21,6 +21,8 @@ Copy-Item -LiteralPath (Join-Path $buildDir 'PhoebeCleaner.exe') -Destination (J
 New-Item -ItemType Directory -Force -Path $assetDestination | Out-Null
 Copy-Item -LiteralPath (Join-Path $assetSource 'spritesheets') -Destination $assetDestination -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $assetSource 'spritesheets_v2') -Destination $assetDestination -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $assetSource 'spritesheets_v3_anchored') -Destination $assetDestination -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $assetSource 'spritesheets_v4_30') -Destination $assetDestination -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $assetSource 'framecache') -Destination $assetDestination -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $assetSource 'animation-spec.json') -Destination $assetDestination -Force
 

@@ -9,3 +9,13 @@ target_link_libraries(PhoebeCleaner PRIVATE gdiplus shell32 user32 gdi32 advapi3
 if(MINGW)
   target_link_options(PhoebeCleaner PRIVATE -municode -static -static-libgcc -static-libstdc++)
 endif()
+
+add_library(PhoebeShellExtension SHARED src/shell_extension.cpp)
+target_compile_features(PhoebeShellExtension PRIVATE cxx_std_20)
+target_compile_definitions(PhoebeShellExtension PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_libraries(PhoebeShellExtension PRIVATE ole32 shell32 shlwapi advapi32 user32 uuid)
+set_target_properties(PhoebeShellExtension PROPERTIES PREFIX "")
+
+if(MINGW)
+  target_link_options(PhoebeShellExtension PRIVATE -static -static-libgcc -static-libstdc++)
+endif()

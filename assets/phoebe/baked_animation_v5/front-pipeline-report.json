@@ -1,0 +1,46 @@
+{
+  "front-skyfall": {
+    "source": "D:\\delete\\assets\\phoebe\\generated_front_pipeline_v5\\front-skyfall.png",
+    "frames": 15
+  },
+  "front-pickup": {
+    "source": "D:\\delete\\assets\\phoebe\\generated_front_pipeline_v5\\front-pickup.png",
+    "frames": 15
+  },
+  "front-eat": {
+    "source": "D:\\delete\\assets\\phoebe\\generated_front_pipeline_v5\\front-eat.png",
+    "frames": 15
+  },
+  "front-burp-teleport": {
+    "source": "D:\\delete\\assets\\phoebe\\generated_front_pipeline_v5\\front-burp-teleport.png",
+    "frames": 15
+  },
+  "front-failure": {
+    "source": "D:\\delete\\assets\\phoebe\\generated_front_pipeline_v5\\front-failure.png",
+    "frames": 15
+  },
+  "front-neutral-hold": {
+    "source": "front-wave frame 0",
+    "frames": 15
+  },
+  "front-eat-big": {
+    "source": "front-eat",
+    "order": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      14
+    ]
+  }
+}
