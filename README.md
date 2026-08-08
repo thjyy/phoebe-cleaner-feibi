@@ -2,11 +2,31 @@
 
 Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资源管理器中右键文件或文件夹，选择“召唤菲比来清理”，菲比会出现在目标旁边，通过一段完整动画把目标送进回收站。
 
-当前动画版本：**V6**。
+当前动画版本：**V9**。V6 的随机动作与彩蛋保持不变，V8/V9 提供 4 条不参与动作拼接的完整正面流程。
 
 ## 动画预览
 
-下面的 GIF 直接使用程序实际加载的 V6 图集，并按照运行状态机的动作顺序生成，不是概念效果图。
+下面的 GIF 直接使用程序实际加载的正式图集生成，不是概念效果图。
+
+### V8 固定正面流程：法阵点心
+
+<p align="center">
+  <img src="docs/previews/front-v8-magic-snack-full-flow.gif" width="520" alt="菲比从法阵正面出现、拿起并吃掉文件、满足挥手后沉回法阵的完整动画" />
+</p>
+
+这条流程从入场、拿文件、进食、满足到退场使用同一套人物比例和连续姿势，共 3 段、87 帧，标准档约 5 秒。段落边界复用完全相同的交接帧，不再随机拼接满足或退场动作。
+
+### V9 新增三套完整正面流程
+
+<p align="center">
+  <img src="docs/previews/front-v9-sleepy-cloud-full-flow.gif" width="32%" alt="睡云召唤完整正面动画" />
+  <img src="docs/previews/front-v9-portal-peek-full-flow.gif" width="32%" alt="传送门探头完整正面动画" />
+  <img src="docs/previews/front-v9-star-drop-full-flow.gif" width="32%" alt="星光降落完整正面动画" />
+</p>
+
+- **睡云召唤**：从云中睡醒、文件飘到手中、困倦地吃完，再睡进云里飘走。
+- **传送门探头**：从正面传送门探头跳出、把文件卷成纸卷吸入，挥手退回传送门。
+- **星光降落**：沿星光落地并接住文件、变成星星饼干吃掉，最后从脚向上化成星光。
 
 ### 完整正面流程
 
@@ -28,6 +48,7 @@ Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资�
 - 文件移动到回收站，不执行永久删除。
 - 60 FPS 透明置顶动画窗口，窗口点击穿透，不影响资源管理器操作。
 - 正面与侧身使用两条完全独立的动画管线，不播放会导致人物畸变的正侧面翻转。
+- 普通单文件有 45% 概率使用完整正面流程池；同一套不会连续两次抽中。
 - 动作采用加权随机，并尽量避免连续两次抽到同一动作。
 - 支持“简洁、标准、戏剧化”三档播放速度。
 - 文件被占用或删除失败时播放专属失败动画，并保留原文件。
@@ -37,13 +58,16 @@ Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资�
 
 ```text
 召唤
-→ 随机选择入场动画
+→ 普通单文件有 45% 概率播放一套完整 V8/V9 正面流程
+→ 否则随机选择 V6 入场动画
 → 每第 5 次召唤插入“怎么又是我”彩蛋
 → 取起文件
 → 普通进食或文件类型专属彩蛋
 → 随机选择满足动画
 → 随机选择退场动画
 ```
+
+完整正面流程池的相对权重为：法阵点心 35%、睡云召唤 25%、传送门探头 22%、星光降落 18%。空文件夹、多选文件、大文件以及每第 5 次召唤不会随机占用完整流程，仍按原有 V6 专属彩蛋执行。
 
 光点召唤和从天而降从第一帧开始就是正面动作；小跑、睡眼惺忪、探头和瞬移失误全程保持侧身。同一次流程不会混用两套人物比例。
 
@@ -146,6 +170,8 @@ Phoebe Cleaner 是一个 Windows 11 桌面宠物式文件清理工具。在资�
 - `QLocalServer`：保持单实例后台进程，并按顺序接收连续清理任务。
 - `send2trash`：调用系统回收站，而不是永久删除文件。
 - `baked_animation_v6`：经过尺寸、透明度、锚点和边界校准的正式 15 帧动画图集。
+- `baked_full_sequence_v8`：最新固定正面流程的 3 张 29 帧正式图集。
+- `baked_front_sequences_v9`：睡云、传送门、星光三套完整流程，共 9 张 29 帧正式图集。
 
 资源管理器详情视图不提供图标坐标时，Shell 扩展会把准确的视图窗口句柄交给 Qt，由 Qt 只在该视图中查找已选中行，避免定位到同名文件或错误窗口。
 
@@ -179,9 +205,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 ## 动画资源
 
 - `assets/phoebe/baked_animation_v6`：程序实际加载的 V6 正式动画图集。
+- `assets/phoebe/baked_full_sequence_v8`：程序实际加载的 V8 完整“法阵点心”流程图集。
+- `assets/phoebe/generated_full_sequences_v8`：V8 三段连续动画的绿幕源图与透明化结果。
+- `assets/phoebe/baked_front_sequences_v9`：程序实际加载的 V9 三套完整正面流程图集。
+- `assets/phoebe/generated_front_full_sequences_v9`：V9 九张绿幕源图与透明化结果。
 - `assets/phoebe/generated_easter_eggs_v6`：V6 彩蛋的绿幕生成源图与透明化结果。
 - `assets/phoebe/generated_front_pipeline_v5`：无畸变正面流程的生成源图。
 - `tools/build_easter_eggs_v6.py`：V6 彩蛋图集统一尺寸和锚点的构建脚本。
+- `tools/build_full_sequence_v8.py`：V8 图集裁切、去接缝、统一锚点、位移补间和预览 GIF 构建脚本。
+- `tools/build_front_sequences_v9.py`：V9 三套完整正面流程的构建与 GIF 预览脚本。
 - `tools/normalize_sprite_anchors.py`：精灵人物锚点校准工具。
 
 V4 的正侧面翻转图集不会被 V6 打包或加载。

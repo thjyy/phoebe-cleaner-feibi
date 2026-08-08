@@ -76,6 +76,16 @@ EXIT_WEIGHTS = {
 }
 FRONT_EXIT_WEIGHTS = {"belly-fade": 45, "light": 35, "burp-teleport": 20}
 LARGE_FILE_BYTES = 256 * 1024 * 1024
+FULL_SEQUENCE_NAME = "full-magic-snack"
+FULL_SEQUENCE_CHANCE = 0.45
+FULL_SEQUENCE_WEIGHTS = {
+    "full-magic-snack": 35,
+    "full-sleepy-cloud": 25,
+    "full-portal-peek": 22,
+    "full-star-drop": 18,
+}
+FULL_SEQUENCE_FRAME_COUNT = 29
+FULL_SEQUENCE_COLUMNS = 10
 
 LINEAR_FRAME_ONSETS = tuple(index / DEFAULT_FRAME_COUNT for index in range(DEFAULT_FRAME_COUNT))
 EAT_FRAME_ONSETS = (
@@ -111,6 +121,9 @@ REACTION_FRAME_ONSETS = (
     0.84,
     0.91,
     0.97,
+)
+FULL_SEQUENCE_FRAME_ONSETS = tuple(
+    index / FULL_SEQUENCE_FRAME_COUNT for index in range(FULL_SEQUENCE_FRAME_COUNT)
 )
 
 
@@ -417,44 +430,77 @@ class PetWindow(QWidget):
             self.is_large_file = False
             self.is_empty_directory = False
 
-        self.entry_variant = (
-            forced_entry
-            if forced_entry in ENTRY_WEIGHTS
-            else choose_weighted(ENTRY_WEIGHTS, str(state.get("last_entry", "")))
+        previous_entry = str(state.get("last_entry", ""))
+        repeat_due = invocation_count % 5 == 0
+        ordinary_single_file = not (
+            self.is_multi_select or self.is_large_file or self.is_empty_directory
         )
-        self.repeat_annoyed = invocation_count % 5 == 0
-        self.front_pipeline = self.entry_variant in {"light", "skyfall"}
-        satisfaction_weights = (
-            FRONT_SATISFACTION_WEIGHTS
-            if self.front_pipeline
-            else SIDE_SATISFACTION_WEIGHTS
-        )
-        self.satisfaction_variant = (
-            forced_satisfaction
-            if forced_satisfaction in satisfaction_weights
-            else choose_weighted(
-                satisfaction_weights, str(state.get("last_satisfaction", ""))
-            )
-        )
-        exit_weights = FRONT_EXIT_WEIGHTS if self.front_pipeline else EXIT_WEIGHTS
-        self.exit_variant = (
-            forced_exit
-            if forced_exit in exit_weights
-            else choose_weighted(exit_weights, str(state.get("last_exit", "")))
+        self.full_sequence_name = (
+            forced_entry if forced_entry in FULL_SEQUENCE_WEIGHTS else ""
         )
         if (
-            not self.front_pipeline
-            and (self.is_large_file or self.is_multi_select)
-            and not forced_exit
+            not self.full_sequence_name
+            and not forced_entry
+            and ordinary_single_file
+            and not repeat_due
+            and random.random() < FULL_SEQUENCE_CHANCE
         ):
-            self.exit_variant = "overfull"
+            self.full_sequence_name = choose_weighted(
+                FULL_SEQUENCE_WEIGHTS, previous_entry
+            )
+        self.full_sequence = bool(self.full_sequence_name)
+
+        if self.full_sequence:
+            self.entry_variant = self.full_sequence_name
+            self.repeat_annoyed = False
+            self.front_pipeline = True
+            self.satisfaction_variant = "front-integrated"
+            self.exit_variant = "front-integrated"
+        else:
+            self.entry_variant = (
+                forced_entry
+                if forced_entry in ENTRY_WEIGHTS
+                else choose_weighted(ENTRY_WEIGHTS, previous_entry)
+            )
+            self.repeat_annoyed = repeat_due
+            self.front_pipeline = self.entry_variant in {"light", "skyfall"}
+            satisfaction_weights = (
+                FRONT_SATISFACTION_WEIGHTS
+                if self.front_pipeline
+                else SIDE_SATISFACTION_WEIGHTS
+            )
+            self.satisfaction_variant = (
+                forced_satisfaction
+                if forced_satisfaction in satisfaction_weights
+                else choose_weighted(
+                    satisfaction_weights, str(state.get("last_satisfaction", ""))
+                )
+            )
+            exit_weights = FRONT_EXIT_WEIGHTS if self.front_pipeline else EXIT_WEIGHTS
+            self.exit_variant = (
+                forced_exit
+                if forced_exit in exit_weights
+                else choose_weighted(exit_weights, str(state.get("last_exit", "")))
+            )
+            if (
+                not self.front_pipeline
+                and (self.is_large_file or self.is_multi_select)
+                and not forced_exit
+            ):
+                self.exit_variant = "overfull"
         write_json(
             STATE_FILE,
             {
                 "invocation_count": invocation_count,
                 "last_entry": self.entry_variant,
-                "last_satisfaction": self.satisfaction_variant,
-                "last_exit": self.exit_variant,
+                "last_satisfaction": (
+                    state.get("last_satisfaction", "")
+                    if self.full_sequence
+                    else self.satisfaction_variant
+                ),
+                "last_exit": (
+                    state.get("last_exit", "") if self.full_sequence else self.exit_variant
+                ),
             },
         )
 
@@ -542,17 +588,126 @@ class PetWindow(QWidget):
             delete_trigger: float | None = None,
             frame_onsets: tuple[float, ...] = LINEAR_FRAME_ONSETS,
             fixed_orientation: bool = False,
+            asset_directory: str = "baked_animation_v6",
+            frame_count: int = DEFAULT_FRAME_COUNT,
+            atlas_columns: int = ATLAS_COLUMNS,
         ) -> Animation:
             return Animation(
                 name,
-                self._asset(f"baked_animation_v6/{sheet}.png"),
+                self._asset(f"{asset_directory}/{sheet}.png"),
                 max(180, round(duration_ms * self.speed_factor)),
                 delete_trigger,
                 frame_onsets,
+                frame_count=frame_count,
+                atlas_columns=atlas_columns,
                 fixed_orientation=fixed_orientation,
             )
 
         stages: list[Stage] = []
+        if self.full_sequence:
+            sequence_specs = {
+                "full-magic-snack": (
+                    "baked_full_sequence_v8",
+                    "front-full-magic-snack-entry-pickup",
+                    "front-magic-snack-entry-pickup",
+                    1600,
+                    "front-full-magic-snack-eat-satisfy",
+                    "front-magic-snack-eat-satisfy",
+                    1900,
+                    "exit-front-full-magic-snack",
+                    "front-magic-snack-exit",
+                    1500,
+                ),
+                "full-sleepy-cloud": (
+                    "baked_front_sequences_v9",
+                    "front-full-sleepy-cloud-entry",
+                    "front-sleepy-cloud-entry",
+                    1650,
+                    "front-full-sleepy-cloud-eat",
+                    "front-sleepy-cloud-eat",
+                    1900,
+                    "exit-front-full-sleepy-cloud",
+                    "front-sleepy-cloud-exit",
+                    1600,
+                ),
+                "full-portal-peek": (
+                    "baked_front_sequences_v9",
+                    "front-full-portal-peek-entry",
+                    "front-portal-peek-entry",
+                    1600,
+                    "front-full-portal-peek-eat",
+                    "front-portal-peek-eat",
+                    1850,
+                    "exit-front-full-portal-peek",
+                    "front-portal-peek-exit",
+                    1550,
+                ),
+                "full-star-drop": (
+                    "baked_front_sequences_v9",
+                    "front-full-star-drop-entry",
+                    "front-star-drop-entry",
+                    1550,
+                    "front-full-star-drop-eat",
+                    "front-star-drop-eat",
+                    1850,
+                    "exit-front-full-star-drop",
+                    "front-star-drop-exit",
+                    1450,
+                ),
+            }
+            (
+                asset_directory,
+                entry_name,
+                entry_sheet,
+                entry_duration,
+                eat_name,
+                eat_sheet,
+                eat_duration,
+                exit_name,
+                exit_sheet,
+                exit_duration,
+            ) = sequence_specs[self.full_sequence_name]
+            full_options = {
+                "frame_onsets": FULL_SEQUENCE_FRAME_ONSETS,
+                "fixed_orientation": True,
+                "asset_directory": asset_directory,
+                "frame_count": FULL_SEQUENCE_FRAME_COUNT,
+                "atlas_columns": FULL_SEQUENCE_COLUMNS,
+            }
+            return [
+                Stage(
+                    animation(
+                        entry_name,
+                        entry_sheet,
+                        entry_duration,
+                        **full_options,
+                    ),
+                    target,
+                    target,
+                ),
+                Stage(
+                    animation(
+                        eat_name,
+                        eat_sheet,
+                        eat_duration,
+                        18 / 28,
+                        **full_options,
+                    ),
+                    target,
+                    target,
+                ),
+                Stage(
+                    animation(
+                        exit_name,
+                        exit_sheet,
+                        exit_duration,
+                        **full_options,
+                    ),
+                    target,
+                    target,
+                ),
+            ]
+
         if self.front_pipeline:
             if self.entry_variant == "light":
                 stages.append(
