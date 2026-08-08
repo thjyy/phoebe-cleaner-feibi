@@ -4,6 +4,7 @@
 /.venv/
 /dist-qt/
 /dist-qt-builds/
+/release/
 **/__pycache__/
 *.egg-info/
 *.user

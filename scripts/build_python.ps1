@@ -29,6 +29,7 @@ $outputDir = Join-Path $projectRoot "dist-qt-builds\$buildStamp"
     --add-data "$(Join-Path $projectRoot 'assets\phoebe\baked_animation_v6');assets\phoebe\baked_animation_v6" `
     --add-data "$(Join-Path $projectRoot 'assets\phoebe\baked_full_sequence_v8');assets\phoebe\baked_full_sequence_v8" `
     --add-data "$(Join-Path $projectRoot 'assets\phoebe\baked_front_sequences_v9');assets\phoebe\baked_front_sequences_v9" `
+    --add-data "$(Join-Path $projectRoot 'assets\phoebe\baked_motion_families_v10');assets\phoebe\baked_motion_families_v10" `
     --add-data "$(Join-Path $projectRoot 'assets\phoebe\spritesheets_v3_anchored\failure-bite.png');assets\phoebe\spritesheets_v3_anchored" `
     (Join-Path $projectRoot 'python_app\phoebe_cleaner\app.py')
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller failed with exit code $LASTEXITCODE" }

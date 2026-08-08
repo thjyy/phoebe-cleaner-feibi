@@ -76,16 +76,48 @@ EXIT_WEIGHTS = {
 }
 FRONT_EXIT_WEIGHTS = {"belly-fade": 45, "light": 35, "burp-teleport": 20}
 LARGE_FILE_BYTES = 256 * 1024 * 1024
+MIB = 1024 * 1024
 FULL_SEQUENCE_NAME = "full-magic-snack"
-FULL_SEQUENCE_CHANCE = 0.45
-FULL_SEQUENCE_WEIGHTS = {
-    "full-magic-snack": 35,
-    "full-sleepy-cloud": 25,
-    "full-portal-peek": 22,
-    "full-star-drop": 18,
+FULL_SEQUENCE_CHANCE = 0.60
+LEGACY_FULL_SEQUENCE_WEIGHTS = {
+    "full-magic-snack": 6,
+    "full-sleepy-cloud": 5,
+    "full-portal-peek": 5,
+    "full-star-drop": 4,
 }
+V10_FULL_SEQUENCE_WEIGHTS = {
+    "full-greedy-hat": 20,
+    "full-file-juice": 18,
+    "full-runaway-chase": 18,
+    "full-afternoon-tea": 15,
+    "full-acrobat-toss": 17,
+    "full-giant-file-boss": 12,
+}
+FULL_SEQUENCE_WEIGHTS = {
+    **LEGACY_FULL_SEQUENCE_WEIGHTS,
+    **V10_FULL_SEQUENCE_WEIGHTS,
+}
+V10_SHARE_WITHIN_FULL_SEQUENCES = 5 / 6
 FULL_SEQUENCE_FRAME_COUNT = 29
 FULL_SEQUENCE_COLUMNS = 10
+V10_FRAME_COUNT = 57
+V10_COLUMNS = 10
+
+
+def content_duration_factor(total_bytes: int) -> float:
+    """Return an uncapped timing multiplier for file-handling animation.
+
+    Small files deliberately receive extra breathing room so dense V10 clips
+    are readable.  Up to 256 MiB the complete stories remain roughly within
+    the requested 5–10 second range.  Beyond that threshold each doubling adds
+    more handling time without an artificial maximum.
+    """
+
+    size_mib = max(0.0, total_bytes / MIB)
+    if size_mib <= 256.0:
+        progress = math.log2(1.0 + size_mib) / math.log2(257.0)
+        return 1.45 + 0.80 * progress
+    return 2.25 + 0.35 * math.log2(size_mib / 256.0)
 
 LINEAR_FRAME_ONSETS = tuple(index / DEFAULT_FRAME_COUNT for index in range(DEFAULT_FRAME_COUNT))
 EAT_FRAME_ONSETS = (
@@ -125,6 +157,7 @@ REACTION_FRAME_ONSETS = (
 FULL_SEQUENCE_FRAME_ONSETS = tuple(
     index / FULL_SEQUENCE_FRAME_COUNT for index in range(FULL_SEQUENCE_FRAME_COUNT)
 )
+V10_FRAME_ONSETS = tuple(index / V10_FRAME_COUNT for index in range(V10_FRAME_COUNT))
 
 
 @dataclass(frozen=True)
@@ -417,18 +450,20 @@ class PetWindow(QWidget):
         )
         invocation_count = int(state.get("invocation_count", 0)) + 1
         try:
-            total_file_bytes = sum(
+            self.total_file_bytes = sum(
                 path.stat().st_size for path in self.target_paths if path.is_file()
             )
-            self.is_large_file = total_file_bytes >= LARGE_FILE_BYTES
+            self.is_large_file = self.total_file_bytes >= LARGE_FILE_BYTES
             self.is_empty_directory = (
                 len(self.target_paths) == 1
                 and target_path.is_dir()
                 and next(target_path.iterdir(), None) is None
             )
         except OSError:
+            self.total_file_bytes = 0
             self.is_large_file = False
             self.is_empty_directory = False
+        self.content_duration_factor = content_duration_factor(self.total_file_bytes)
 
         previous_entry = str(state.get("last_entry", ""))
         repeat_due = invocation_count % 5 == 0
@@ -441,12 +476,24 @@ class PetWindow(QWidget):
         if (
             not self.full_sequence_name
             and not forced_entry
+            and self.is_large_file
+            and not self.is_multi_select
+        ):
+            self.full_sequence_name = "full-giant-file-boss"
+        if (
+            not self.full_sequence_name
+            and not forced_entry
             and ordinary_single_file
             and not repeat_due
             and random.random() < FULL_SEQUENCE_CHANCE
         ):
+            sequence_pool = (
+                V10_FULL_SEQUENCE_WEIGHTS
+                if random.random() < V10_SHARE_WITHIN_FULL_SEQUENCES
+                else LEGACY_FULL_SEQUENCE_WEIGHTS
+            )
             self.full_sequence_name = choose_weighted(
-                FULL_SEQUENCE_WEIGHTS, previous_entry
+                sequence_pool, previous_entry
             )
         self.full_sequence = bool(self.full_sequence_name)
 
@@ -591,11 +638,15 @@ class PetWindow(QWidget):
             asset_directory: str = "baked_animation_v6",
             frame_count: int = DEFAULT_FRAME_COUNT,
             atlas_columns: int = ATLAS_COLUMNS,
+            content_sensitive: bool = False,
         ) -> Animation:
+            duration_factor = self.speed_factor * (
+                self.content_duration_factor if content_sensitive else 1.0
+            )
             return Animation(
                 name,
                 self._asset(f"{asset_directory}/{sheet}.png"),
-                max(180, round(duration_ms * self.speed_factor)),
+                max(180, round(duration_ms * duration_factor)),
                 delete_trigger,
                 frame_onsets,
                 frame_count=frame_count,
@@ -614,6 +665,7 @@ class PetWindow(QWidget):
                     "front-full-magic-snack-eat-satisfy",
                     "front-magic-snack-eat-satisfy",
                     1900,
+                    18 / 28,
                     "exit-front-full-magic-snack",
                     "front-magic-snack-exit",
                     1500,
@@ -626,6 +678,7 @@ class PetWindow(QWidget):
                     "front-full-sleepy-cloud-eat",
                     "front-sleepy-cloud-eat",
                     1900,
+                    18 / 28,
                     "exit-front-full-sleepy-cloud",
                     "front-sleepy-cloud-exit",
                     1600,
@@ -638,6 +691,7 @@ class PetWindow(QWidget):
                     "front-full-portal-peek-eat",
                     "front-portal-peek-eat",
                     1850,
+                    18 / 28,
                     "exit-front-full-portal-peek",
                     "front-portal-peek-exit",
                     1550,
@@ -650,9 +704,88 @@ class PetWindow(QWidget):
                     "front-full-star-drop-eat",
                     "front-star-drop-eat",
                     1850,
+                    18 / 28,
                     "exit-front-full-star-drop",
                     "front-star-drop-exit",
                     1450,
+                ),
+                "full-greedy-hat": (
+                    "baked_motion_families_v10",
+                    "front-full-greedy-hat-entry",
+                    "front-greedy-hat-entry",
+                    1750,
+                    "front-full-greedy-hat-core",
+                    "front-greedy-hat-core",
+                    2100,
+                    16 / 28,
+                    "exit-front-full-greedy-hat",
+                    "front-greedy-hat-exit",
+                    1650,
+                ),
+                "full-file-juice": (
+                    "baked_motion_families_v10",
+                    "front-full-file-juice-entry",
+                    "front-file-juice-entry",
+                    1650,
+                    "front-full-file-juice-core",
+                    "front-file-juice-core",
+                    2200,
+                    14 / 28,
+                    "exit-front-full-file-juice",
+                    "front-file-juice-exit",
+                    1700,
+                ),
+                "full-runaway-chase": (
+                    "baked_motion_families_v10",
+                    "front-full-runaway-chase-entry",
+                    "front-runaway-chase-entry",
+                    1800,
+                    "front-full-runaway-chase-core",
+                    "front-runaway-chase-core",
+                    2300,
+                    23 / 28,
+                    "exit-front-full-runaway-chase",
+                    "front-runaway-chase-exit",
+                    1700,
+                ),
+                "full-afternoon-tea": (
+                    "baked_motion_families_v10",
+                    "front-full-afternoon-tea-entry",
+                    "front-afternoon-tea-entry",
+                    1700,
+                    "front-full-afternoon-tea-core",
+                    "front-afternoon-tea-core",
+                    2200,
+                    10 / 28,
+                    "exit-front-full-afternoon-tea",
+                    "front-afternoon-tea-exit",
+                    1800,
+                ),
+                "full-acrobat-toss": (
+                    "baked_motion_families_v10",
+                    "front-full-acrobat-toss-entry",
+                    "front-acrobat-toss-entry",
+                    1650,
+                    "front-full-acrobat-toss-core",
+                    "front-acrobat-toss-core",
+                    2200,
+                    22 / 28,
+                    "exit-front-full-acrobat-toss",
+                    "front-acrobat-toss-exit",
+                    1600,
+                ),
+                "full-giant-file-boss": (
+                    "baked_motion_families_v10",
+                    "front-full-giant-file-boss-entry",
+                    "front-giant-file-entry",
+                    1800,
+                    "front-full-giant-file-boss-core",
+                    "front-giant-file-core",
+                    2500,
+                    23 / 28,
+                    "exit-front-full-giant-file-boss",
+                    "front-giant-file-exit",
+                    2000,
                 ),
             }
             (
@@ -663,16 +796,18 @@ class PetWindow(QWidget):
                 eat_name,
                 eat_sheet,
                 eat_duration,
+                delete_trigger,
                 exit_name,
                 exit_sheet,
                 exit_duration,
             ) = sequence_specs[self.full_sequence_name]
+            is_v10 = asset_directory == "baked_motion_families_v10"
             full_options = {
-                "frame_onsets": FULL_SEQUENCE_FRAME_ONSETS,
+                "frame_onsets": V10_FRAME_ONSETS if is_v10 else FULL_SEQUENCE_FRAME_ONSETS,
                 "fixed_orientation": True,
                 "asset_directory": asset_directory,
-                "frame_count": FULL_SEQUENCE_FRAME_COUNT,
-                "atlas_columns": FULL_SEQUENCE_COLUMNS,
+                "frame_count": V10_FRAME_COUNT if is_v10 else FULL_SEQUENCE_FRAME_COUNT,
+                "atlas_columns": V10_COLUMNS if is_v10 else FULL_SEQUENCE_COLUMNS,
             }
             return [
                 Stage(
@@ -690,7 +825,8 @@ class PetWindow(QWidget):
                         eat_name,
                         eat_sheet,
                         eat_duration,
-                        18 / 28,
+                        delete_trigger,
+                        content_sensitive=True,
                         **full_options,
                     ),
                     target,
@@ -773,6 +909,7 @@ class PetWindow(QWidget):
                     13 / 14,
                     EAT_FRAME_ONSETS,
                     fixed_orientation=True,
+                    content_sensitive=True,
                 )
                 front_eat_motion = "smooth"
             elif self.is_large_file:
@@ -783,6 +920,7 @@ class PetWindow(QWidget):
                     13 / 14,
                     EAT_FRAME_ONSETS,
                     fixed_orientation=True,
+                    content_sensitive=True,
                 )
                 front_eat_motion = "shake"
             elif self.is_empty_directory:
@@ -793,6 +931,7 @@ class PetWindow(QWidget):
                     13 / 14,
                     EAT_FRAME_ONSETS,
                     fixed_orientation=True,
+                    content_sensitive=True,
                 )
                 front_eat_motion = "smooth"
             else:
@@ -803,6 +942,7 @@ class PetWindow(QWidget):
                     10 / 14,
                     EAT_FRAME_ONSETS,
                     fixed_orientation=True,
+                    content_sensitive=True,
                 )
                 front_eat_motion = "smooth"
             stages.append(Stage(front_eat, target, target, motion=front_eat_motion))
@@ -949,7 +1089,12 @@ class PetWindow(QWidget):
 
         if self.is_multi_select:
             eat = animation(
-                "side-multi-cookie", "side-multi-cookie", 2450, 13 / 14, EAT_FRAME_ONSETS
+                "side-multi-cookie",
+                "side-multi-cookie",
+                2450,
+                13 / 14,
+                EAT_FRAME_ONSETS,
+                content_sensitive=True,
             )
             eat_motion = "smooth"
         elif self.is_large_file:
@@ -959,15 +1104,28 @@ class PetWindow(QWidget):
                 2600,
                 13 / 14,
                 EAT_FRAME_ONSETS,
+                content_sensitive=True,
             )
             eat_motion = "shake"
         elif self.is_empty_directory:
             eat = animation(
-                "side-empty-folder", "side-empty-folder", 2350, 13 / 14, EAT_FRAME_ONSETS
+                "side-empty-folder",
+                "side-empty-folder",
+                2350,
+                13 / 14,
+                EAT_FRAME_ONSETS,
+                content_sensitive=True,
             )
             eat_motion = "smooth"
         else:
-            eat = animation("eat-bite", "eat-bite", 1550, 10 / 14, EAT_FRAME_ONSETS)
+            eat = animation(
+                "eat-bite",
+                "eat-bite",
+                1550,
+                10 / 14,
+                EAT_FRAME_ONSETS,
+                content_sensitive=True,
+            )
             eat_motion = "smooth"
         stages.append(Stage(eat, target, target, motion=eat_motion))
 

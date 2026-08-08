@@ -1,0 +1,523 @@
+{
+  "frame_count_per_stage": 57,
+  "stages_per_sequence": 3,
+  "atlas_columns": 10,
+  "sequences": {
+    "greedy-hat": {
+      "label": "贪吃帽子",
+      "durations_ms": [
+        1750,
+        2100,
+        1650
+      ],
+      "fit_factor": 0.88,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            254.5,
+            151.0,
+            88.0,
+            95.0
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            120.56,
+            132.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            56
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            267.0,
+            158.0,
+            89.0,
+            94.0
+          ],
+          "target_anchor": [
+            200.0,
+            169.0,
+            67.0,
+            72.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            50
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            247.5,
+            144.5,
+            89.0,
+            96.0
+          ],
+          "target_anchor": [
+            191.0,
+            150.0,
+            65.0,
+            73.0
+          ],
+          "source_union": [
+            17,
+            38,
+            320,
+            290
+          ],
+          "scale": 0.75039,
+          "offset": [
+            5,
+            42
+          ]
+        }
+      }
+    },
+    "file-juice": {
+      "label": "文件果汁车",
+      "durations_ms": [
+        1650,
+        2200,
+        1700
+      ],
+      "fit_factor": 0.75,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            105.0,
+            129.0,
+            156.5,
+            140.0
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            102.75,
+            112.5
+          ],
+          "source_union": [
+            19,
+            14,
+            293,
+            310
+          ],
+          "scale": 0.75456,
+          "offset": [
+            28,
+            73
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            135.0,
+            143.0,
+            155.0,
+            153.0
+          ],
+          "target_anchor": [
+            98.0,
+            171.0,
+            114.0,
+            103.0
+          ],
+          "source_union": [
+            15,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.69396,
+          "offset": [
+            4,
+            72
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            128.5,
+            123.0,
+            136.0,
+            146.5
+          ],
+          "target_anchor": [
+            90.0,
+            146.0,
+            89.0,
+            129.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            53
+          ]
+        }
+      }
+    },
+    "runaway-chase": {
+      "label": "逃跑文件追逐",
+      "durations_ms": [
+        1800,
+        2300,
+        1700
+      ],
+      "fit_factor": 0.8,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            171.5,
+            216.5,
+            133.5,
+            60.0
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            109.6,
+            120.0
+          ],
+          "source_union": [
+            3,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.76341,
+          "offset": [
+            5,
+            7
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            200.0,
+            195.0,
+            142.0,
+            63.0
+          ],
+          "target_anchor": [
+            137.0,
+            172.0,
+            98.0,
+            46.0
+          ],
+          "source_union": [
+            7,
+            0,
+            320,
+            306
+          ],
+          "scale": 0.71682,
+          "offset": [
+            2,
+            32
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            173.5,
+            176.5,
+            99.0,
+            92.5
+          ],
+          "target_anchor": [
+            125.0,
+            148.0,
+            66.0,
+            70.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.72673,
+          "offset": [
+            7,
+            20
+          ]
+        }
+      }
+    },
+    "afternoon-tea": {
+      "label": "魔法下午茶",
+      "durations_ms": [
+        1700,
+        2200,
+        1800
+      ],
+      "fit_factor": 0.72,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            103.0,
+            124.0,
+            173.0,
+            111.5
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            98.64,
+            108.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            76
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            136.0,
+            121.0,
+            161.0,
+            105.0
+          ],
+          "target_anchor": [
+            87.0,
+            171.0,
+            132.0,
+            90.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            79
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            129.0,
+            155.0,
+            162.0,
+            159.0
+          ],
+          "target_anchor": [
+            98.0,
+            166.0,
+            94.0,
+            73.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.4995,
+          "offset": [
+            34,
+            89
+          ]
+        }
+      }
+    },
+    "acrobat-toss": {
+      "label": "空中特技投食",
+      "durations_ms": [
+        1650,
+        2200,
+        1600
+      ],
+      "fit_factor": 0.88,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            129.5,
+            161.5,
+            83.5,
+            116.5
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            120.56,
+            132.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            48
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            136.0,
+            182.0,
+            80.0,
+            116.0
+          ],
+          "target_anchor": [
+            111.0,
+            170.0,
+            65.0,
+            107.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            32
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            146.0,
+            237.5,
+            106.5,
+            46.0
+          ],
+          "target_anchor": [
+            119.0,
+            153.0,
+            79.0,
+            67.0
+          ],
+          "source_union": [
+            2,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.76101,
+          "offset": [
+            5,
+            7
+          ]
+        }
+      }
+    },
+    "giant-file": {
+      "label": "大文件 Boss",
+      "durations_ms": [
+        1800,
+        2500,
+        2000
+      ],
+      "fit_factor": 0.68,
+      "clips": {
+        "entry": {
+          "source_anchor": [
+            170.0,
+            159.0,
+            96.0,
+            140.0
+          ],
+          "target_anchor": [
+            119.0,
+            170.0,
+            93.16,
+            102.0
+          ],
+          "source_union": [
+            0,
+            0,
+            320,
+            320
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            50
+          ]
+        },
+        "core": {
+          "source_anchor": [
+            189.0,
+            162.0,
+            96.0,
+            160.0
+          ],
+          "target_anchor": [
+            105.0,
+            170.0,
+            73.0,
+            103.0
+          ],
+          "source_union": [
+            0,
+            9,
+            320,
+            287
+          ],
+          "scale": 0.68264,
+          "offset": [
+            7,
+            59
+          ]
+        },
+        "exit": {
+          "source_anchor": [
+            211.0,
+            174.0,
+            102.0,
+            86.0
+          ],
+          "target_anchor": [
+            92.0,
+            134.0,
+            77.0,
+            69.0
+          ],
+          "source_union": [
+            0,
+            11,
+            320,
+            300
+          ],
+          "scale": 0.75625,
+          "offset": [
+            7,
+            2
+          ]
+        }
+      }
+    }
+  }
+}
